@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  f1-api-proxy:
+    build: .
+    ports:
+      - '8000:8000'
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+      - JOLPICA_API_URL=http://api.jolpi.ca/ergast/f1
+      - CACHE_TTL_HISTORICAL=86400
+      - CACHE_TTL_CURRENT=3600
+      - CACHE_TTL_LIVE=300
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX_REQUESTS=100
+    volumes:
+      - ./src:/app/src:ro
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  default:
+    name: f1-mcp-network
